@@ -1,6 +1,5 @@
 # Planar Waveguide with Multilayer Coating Solver
 
-![MOLINO PROJECT LOGO](MOLINO.png)
 
 ## To do list:
 
@@ -32,14 +31,9 @@ This Python project is designed for simulating the optical properties of wavegui
 - `numpy`: For numerical operations.
 - `scipy`: Specifically `scipy.optimize.brentq` for root finding.
 - `matplotlib`: For plotting and interactive visualizations.
-- `concurrent.futures`: For parallel execution to improve computational efficiency.
 
 ## Installation
-Ensure you have Python 3 installed along with the required dependencies. You can install the dependencies using pip:
-```shell
-pip install --upgrade refractiveindex
-pip install --upgrade scikit-learn
-```
+Ensure you have Python 3 installed along with the required dependencies.
 
 
 ## Usage
@@ -82,8 +76,7 @@ run_gui_simple(lambda_0, n_core, n_sub, n_clad, w, w_clad, m)
 ### Interactive Elements
 The script uses `matplotlib.widgets` to create interactive sliders and buttons. These UI elements allow you to dynamically adjust the dimensions and refractive indices of the waveguide and its cladding layers, and immediately see the impact on the plot of effective refractive index vs. wavelength.
 
-## Author
-- Alexey
+
 
 ## License
 This project is open source and available under the [MIT License](https://opensource.org/licenses/MIT).
