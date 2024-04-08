@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys,os
-sys.path.append(os.getcwd() + '/../../Solve_PWML')
+sys.path.append(os.getcwd() + '/../../MLWG_solver')
 sys.path.append(os.getcwd() + '/../../../')
 
 from refractiveindex import RefractiveIndexMaterial
