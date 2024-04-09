@@ -62,7 +62,7 @@ class LassoManager:
             y_data = np.array(yarrays[ii])
             vp_select, vg_select, gvd_select  = dispersion_calc(x_data,y_data)
             lines2.append(self.ax2.plot(x_data,vg_select))
-            lines3.append(self.ax3.plot(x_data,gvd_select))
+            lines3.append(self.ax3.plot(x_data[2:-2],gvd_select[2:-2]))
         #     vg_tot_sel.append(vg_select)
         #     gvd_tot_sel.append(gvd_select)
         # self.scatter2.set_offsets(list( zip(xarrays,vg_tot_sel)))
@@ -159,16 +159,6 @@ def run_gui_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, w_CORE, w_list_CL
                          '[um]', 0.02, 3*w_c, valinit=w_c))
 
 
-    # [left, bottom, width, height]
-    # ax_a_n = plt.axes([0.68, 0.15, 0.25, 0.03])
-
-    # slider_a_n = Slider(ax_a_n, 'n core [um]', 1, 3, valinit=n_CORE)
-    # slider_ML_n = []
-    # for ii, n_c in enumerate(n_list_CLAD):
-    #     ax_b = plt.axes([0.68, 0.12-ii*0.03, 0.25, 0.03])
-    #     slider_ML_n.append(
-    #         Slider(ax_b, 'n layer '+str(ii+1) + '[um]', 1, 2, valinit=n_c))
-
     # Define the reset button
     resetax = plt.axes([0.68+0.25-0.1, 0.1, 0.1, 0.03])
     global button_reset #Needs to be initialized globally to remain responsive
@@ -215,7 +205,7 @@ def run_gui_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, w_CORE, w_list_CL
         ax[1,0].set_xlim(lambda_vector[0], lambda_vector[-1])
 
         ax[1,1].cla()
-        ax[1,1].plot(lambda_vector[5:-2],  betta2sn[5:-2])
+        ax[1,1].plot(lambda_vector,  betta2sn)
         ax[1,1].set_xlim(lambda_vector[0], lambda_vector[-1])
         
         fig.canvas.draw_idle()
