@@ -122,7 +122,7 @@ def run_gui_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, w_CORE, w_list_CL
     ax[0,0].legend()
     
     ###############   AX [0,1]   ###############
-    # line_diff, = ax[0,1].plot(lambda_vector,  n_eff-n_eff_simple, 'k',label='Difference')
+    ax[0,1].text(0.15, 0.5, '<- Select region', dict(size=15))
     # ax[0,1].set_ylabel('Difference')
     # ax[0,1].set_xlabel('Wavelength [$\mu$m]')
     # ax[0,1].set_xlim(lambda_vector[0], lambda_vector[-1])
@@ -215,7 +215,7 @@ def run_gui_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, w_CORE, w_list_CL
         ax[1,0].set_xlim(lambda_vector[0], lambda_vector[-1])
 
         ax[1,1].cla()
-        ax[1,1].plot(lambda_vector,  betta2sn)
+        ax[1,1].plot(lambda_vector[5:-2],  betta2sn[5:-2])
         ax[1,1].set_xlim(lambda_vector[0], lambda_vector[-1])
         
         fig.canvas.draw_idle()
