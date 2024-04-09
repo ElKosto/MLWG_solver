@@ -13,19 +13,13 @@ sys.path.append(os.getcwd() + '/../../MLWG_solver')
  
 from refractiveindex import RefractiveIndexMaterial
 
-from sklearn.cluster import DBSCAN
-from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import OPTICS
-from sklearn.cluster import SpectralClustering
-
 from src.core.mode_solver import calc_n_eff_ML,calc_n_eff,calc_n_eff_general
 from src.core.mode_solver import find_zero_crossings,optim_ml_pwg,optim_asymmetric_pwg
 from src.visualization.GUI import run_gui,run_gui_simple,run_gui_general
  
 from src.visualization.GUI import run_gui_general
 from src.utils.help_functs import construct_clad
- 
-import time
+
  
 SP = RefractiveIndexMaterial(shelf='main', book='Al2O3', page='Malitson')
 LN = RefractiveIndexMaterial(shelf='main', book='LiNbO3', page='Zelmon-o')
