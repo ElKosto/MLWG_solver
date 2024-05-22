@@ -61,7 +61,7 @@ class LassoManager:
             x_data = np.array(xarrays[ii])
             y_data = np.array(yarrays[ii])
             vp_select, vg_select, gvd_select  = dispersion_calc(x_data,y_data)
-            lines2.append(self.ax2.plot(x_data,vg_select))
+            lines2.append(self.ax2.plot(x_data,1/vg_select))
             lines3.append(self.ax3.plot(x_data[2:-2],gvd_select[2:-2]))
         #     vg_tot_sel.append(vg_select)
         #     gvd_tot_sel.append(gvd_select)
@@ -107,6 +107,7 @@ def run_gui_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, w_CORE, w_list_CL
     
     ### make figure
     fig, ax = plt.subplots(2, 2)#, layout='constrained')
+    fig.set_size_inches(8.5, 4.5)
     sns.set_theme()
 
     ###############   AX [0,0]   ###############
@@ -123,6 +124,7 @@ def run_gui_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, w_CORE, w_list_CL
     
     ###############   AX [0,1]   ###############
     ax[0,1].text(0.15, 0.5, '<- Select region', dict(size=15))
+    # ax[0,1].set_xtich
     # ax[0,1].set_ylabel('Difference')
     # ax[0,1].set_xlabel('Wavelength [$\mu$m]')
     # ax[0,1].set_xlim(lambda_vector[0], lambda_vector[-1])
@@ -134,16 +136,17 @@ def run_gui_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, w_CORE, w_list_CL
     ###############   AX [1,0]   ###############
     
     # line_vg1, = ax[1,0].plot(lambda_vector,  vg)
-    line_vg2, = ax[1,0].plot(lambda_vector,  vgs)
-    ax[1,0].set_ylabel('Group velocity')
+    line_vg2, = ax[1,0].plot(lambda_vector, 1/ vgs)
+    ax[1,0].set_ylabel('1/Vg [fs/mm]')
     ax[1,0].set_xlabel('Wavelength [$\mu$m]')
     ax[1,0].set_xlim(lambda_vector[0], lambda_vector[-1])
+    ax[1,0].ticklabel_format(useMathText=True)
     
     # ###############   AX [1,1]   ###############
     
     # line_disp1, = ax[1,1].plot(lambda_vector,  betta2)
     line_disp2, = ax[1,1].plot(lambda_vector,  betta2s)
-    ax[1,1].set_ylabel('Group velocity dispersion')
+    ax[1,1].set_ylabel('GVD [fs^2/mm]')
     ax[1,1].set_xlabel('Wavelength [$\mu$m]')
     ax[1,1].set_xlim(lambda_vector[1], lambda_vector[-2])
     # ax[1,1].set_ylim(-500,2000)
@@ -201,13 +204,17 @@ def run_gui_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, w_CORE, w_list_CL
         line2.set_ydata(n_eff_smp_new)
 
         ax[1,0].cla()
-        ax[1,0].plot(lambda_vector,  vgsn)
+        ax[1,0].plot(lambda_vector,  1/vgsn)
         ax[1,0].set_xlim(lambda_vector[0], lambda_vector[-1])
-
+        ax[1,0].set_ylabel('1/Vg [fs/mm]')
+        ax[1,0].set_xlabel('Wavelength [$\mu$m]')
+        
         ax[1,1].cla()
         ax[1,1].plot(lambda_vector,  betta2sn)
         ax[1,1].set_xlim(lambda_vector[0], lambda_vector[-1])
-        
+        ax[1,1].set_ylabel('GVD [fs^2/mm]')
+        ax[1,1].set_xlabel('Wavelength [$\mu$m]')
+
         fig.canvas.draw_idle()
         fig.canvas.flush_events()
 
@@ -227,15 +234,6 @@ def run_gui_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, w_CORE, w_list_CL
     plt.show()
     
     return 0
-
-
-
-
-
-
-
-
-
 
 
 
