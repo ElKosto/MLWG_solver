@@ -92,14 +92,14 @@ class LassoManager:
         self.scatter.set_offsets(new_data)
         self.update_plot_colors()
 
-def run_gui_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, w_CORE, w_list_CLAD, m):
+def run_gui_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, w_CORE, w_list_CLAD, m, polar):
 
     n_eff = calc_n_eff_general(lambda_vector, n_CORE,
-                     n_SUB, n_list_CLAD, w_CORE, m, w_list_CLAD)
+                     n_SUB, n_list_CLAD, w_CORE, m, polar, w_list_CLAD)
     n_eff_arr = reshape_n_eff(lambda_vector,n_eff)
     ### calculate the simple version of the asymmtric thick cladding
     n_eff_simple = calc_n_eff_general(
-        lambda_vector, n_CORE, n_SUB, n_list_CLAD[:,0], w_CORE, m)
+        lambda_vector, n_CORE, n_SUB, n_list_CLAD[:,0], w_CORE, m, polar)
     n_eff_smp_list = [item for sublist in n_eff_simple for item in sublist]
     ### calculate vg, betta2
     vps,  vgs, betta2s  = dispersion_calc(lambda_vector,n_eff_smp_list)
@@ -193,8 +193,8 @@ def run_gui_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, w_CORE, w_list_CL
             b.append(slider_ML[ii].val)
             # b_n.append(slider_ML_n[ii].val)
         ### calculate the updated values
-        n_eff_new = calc_n_eff_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, a, m, np.array(b))
-        n_eff_smp_new = calc_n_eff_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD[:,0], a, m)
+        n_eff_new = calc_n_eff_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD, a, m, polar, np.array(b))
+        n_eff_smp_new = calc_n_eff_general(lambda_vector, n_CORE, n_SUB, n_list_CLAD[:,0], a, m, polar)
 
         n_eff_smp_new_list = [item for sublist in n_eff_smp_new for item in sublist]
         n_eff_arr_new = reshape_n_eff(lambda_vector,n_eff_new)

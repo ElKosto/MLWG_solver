@@ -4,7 +4,7 @@ import numpy as np
 # def transfer_matrix_TM_layer_seconds_approachs(n, d, theta_inc_rad, n_core, wavelength):
 
 # @njit
-def TM_boundary(n, d, theta_prev, n_prev, wavelength):
+def TM_boundary(n, d, theta_prev, n_prev, wavelength, polar):
     """
     Calculate the transfer matrix for a single layer.
     ET polarization is assumed 
@@ -18,10 +18,16 @@ def TM_boundary(n, d, theta_prev, n_prev, wavelength):
     """
     # Find the new refraction angle using snell's law assuming n is complex
     theta = np.arcsin(n_prev / n * np.sin(theta_prev),dtype='complex')
-    n_1  = n_prev*np.cos(theta_prev,dtype='complex')
-    n_2 = n*np.cos(theta,dtype='complex')
+    if polar == "TE": 
+        n_1  = n_prev*np.cos(theta_prev,dtype='complex')
+        n_2 = n*np.cos(theta,dtype='complex')
+        a = 1
+    elif polar == "TM":
+        n_2  = n_prev/np.cos(theta_prev,dtype='complex')
+        n_1 = n/np.cos(theta,dtype='complex')
+        a = np.cos(theta,dtype='complex')/np.cos(theta_prev,dtype='complex')
     matrix = np.array([[ n_1 + n_2 , n_2-n_1],
-                       [ n_2-n_1, n_1 + n_2]],dtype='complex')/2/n_2
+                       [ n_2-n_1, n_1 + n_2]],dtype='complex')/2/n_2/a
     return matrix,theta
 
 # @njit
@@ -53,38 +59,38 @@ def mult_rules(a, b):
 
 
 # @njit
-def TM_multilayer(n_list, d_list, theta_in, n_core, wavelength):
+def TM_multilayer(n_list, d_list, theta_in, n_core, wavelength, polar):
     """
     Calculate the transfer matrix for a multilayer film.
     """
     if len(n_list)!= len(d_list):
         print("error n_list and d_list are not of the same size")
         
-    M,theta = TM_boundary(n_list[0], d_list[0], theta_in, n_core, wavelength)
+    M,theta = TM_boundary(n_list[0], d_list[0], theta_in, n_core, wavelength, polar)
     M_prop = TM_propagation(n_list[0], d_list[0], theta_in, n_core, wavelength)
     M = mult_rules(M_prop,M)
     for ii in range(1,len(n_list)):
-        M_bound,theta = TM_boundary(n_list[ii], d_list[ii], theta, n_list[ii-1], wavelength)
+        M_bound,theta = TM_boundary(n_list[ii], d_list[ii], theta, n_list[ii-1], wavelength, polar)
         M = mult_rules(M_bound,M)
         M_prop = TM_propagation(n_list[ii], d_list[ii], theta_in, n_list[ii-1], wavelength)
         M = mult_rules(M_prop,M)
         
     if len(n_list) == 1:
-        M_bound, theta = TM_boundary(1., 1., theta, n_list[-1], wavelength)
+        M_bound, theta = TM_boundary(1., 1., theta, n_list[-1], wavelength, polar)
         M_prop = TM_propagation(1., 10., theta, n_list[-1], wavelength)
         M = mult_rules(M_prop,mult_rules(M_bound,M))
     else:
-        M_bound, theta = TM_boundary(1., 1., theta, n_list[-1], wavelength)
+        M_bound, theta = TM_boundary(1., 1., theta, n_list[-1], wavelength, polar)
         M_prop = TM_propagation(1., 10., theta, n_list[-1], wavelength)
         M = mult_rules(M_prop,mult_rules(M_bound,M))
     return M
 
 # @njit
-def compute_reflection_transmission(n_list, d_list, theta, n_core, wavelength):
+def compute_reflection_transmission(n_list, d_list, theta, n_core, wavelength,polar):
     """
     Compute reflection and transmission coefficients from a multilayer dielectric film.
     """
-    M = TM_multilayer(n_list, d_list, theta, n_core, wavelength)
+    M = TM_multilayer(n_list, d_list, theta, n_core, wavelength, polar)
     t =  (M[0,0]*M[1,1] - M[0,1]*M[1,0])/M[1,1]
     r =  - M[1,0]/M[1,1]
     return r,t

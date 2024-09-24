@@ -41,10 +41,10 @@ n_clad = construct_clad(l1,l2)
 
 
 
-w = 0.5 # Width of the waveguide core in micrometers
-w_clad = np.array([1.1,1.])
+w = 0.4 # Width of the waveguide core in micrometers
+w_clad = np.array([.1,.1])
 m = 0 # mode number
 
-run_gui_general(lambda_0, n_core, n_sub, n_clad, w, w_clad, m)
+run_gui_general(lambda_0, n_core, n_sub, n_clad, w, w_clad, m, 'TM')
 
 

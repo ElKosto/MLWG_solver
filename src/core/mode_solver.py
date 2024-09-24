@@ -6,61 +6,53 @@ from scipy.optimize import brentq
 
 
 # @njit
-def optim_ml_pwg(neff, n_core, n_sub, n_ml, w, w_ml, wavelength, m):
+def optim_ml_pwg(neff, n_core, n_sub, n_ml, w, w_ml, wavelength, m, polar):
     k_0 = 2 * np.pi / wavelength 
     beta = neff * k_0
     theta = np.arccos(neff/n_core) ### theta is not in the incidence plane!
     h = k_0**2 * n_core**2 - beta**2
     q = beta**2 - k_0**2 * n_sub**2
     ### reflection phase from the substrate
-    phui_SUB = 2*np.arctan( np.sqrt(q/h))
+    if polar == "TE": 
+        phi_SUB = 2*np.arctan( np.sqrt(q/h))
+    elif polar == "TM":
+        phi_SUB = 2*np.arctan((n_core/n_sub)**2 * np.sqrt(q/h))
     ### reflection phase the multilayer cladding
-    r, t = compute_reflection_transmission(n_ml, w_ml, np.pi/2-theta, n_core, wavelength)
+    r, t = compute_reflection_transmission(n_ml, w_ml, np.pi/2-theta, n_core, wavelength, polar)
     # print(np.pi/2-theta,wavelength,' in')
     phi_ML = np.angle(r)
     # print(phui_SUB, wavelength, ' reflection')
-    return np.sqrt(h) * w*2 - m*2*np.pi - phui_SUB - phi_ML
+    return np.sqrt(h) * w*2 - m*2*np.pi - phi_SUB - phi_ML
 
 
 # Function to solve for h given a guess for neff
 # @njit
-def optim_asymmetric_pwg(neff, n_core, n_2, n_3, w, wavelength, m ):
+def optim_asymmetric_pwg(neff, n_core, n_2, n_3, w, wavelength, m, polar):
     k_0 = 2 * np.pi / wavelength 
     beta = neff * k_0
     h = k_0**2 * n_core**2 - beta**2
     q = lambda n_x : beta**2 - k_0**2 * n_x**2
-    phui_SUB = 2*np.arctan( np.sqrt(q(n_2)/h))
-    phi_CLAD = 2*np.arctan( np.sqrt(q(n_3)/h))
+    if polar == "TE":
+        phui_SUB = 2*np.arctan( np.sqrt(q(n_2)/h))
+        phi_CLAD = 2*np.arctan( np.sqrt(q(n_3)/h))
+    elif polar == "TM":## the right experession is take from wiki
+        phui_SUB = 2*np.arctan((n_core/n_2)**2 * np.sqrt(q(n_2)/h))
+        phi_CLAD = 2*np.arctan((n_core/n_3)**2 * np.sqrt(q(n_3)/h))
     return np.sqrt(h) * w*2 - m*2*np.pi - phui_SUB - phi_CLAD
 
 
 # Function to solve for h given a guess for neff
 # @njit
-def optim_symmetric_pwg(neff, n_1, n_2, w, wavelength ,m):
+def optim_symmetric_pwg(neff, n_1, n_2, w, wavelength ,m, polar):
     k_0 = 2 * np.pi / wavelength 
     beta = neff * k_0
     h = k_0**2 * n_1**2 - beta**2
     q = beta**2 - k_0**2 * n_2**2
-    return np.sqrt(h) * w/2 - m*np.pi/2 - np.arctan( np.sqrt(q/h))
+    if polar == "TE": 
+        return np.sqrt(h) * w/2 - m*np.pi/2 - np.arctan( np.sqrt(q/h))
+    elif polar == "TM":
+        return np.sqrt(h) * w/2 - m*np.pi/2 - np.arctan((n_1/n_2)**2 * np.sqrt(q/h))
 
-### to delete
-# @njit
-# def find_zero (func,n_min,n_max,args):
-#     step = (n_max/n_min)/1000
-#     switch = True
-#     ii = 0
-#     while switch:
-#         result = func(n_max-step*ii,*args)
-#         if n_max-step*ii<n_min:
-#             print ("ERROR mode is not found!")
-#             return 0
-#         if result > 0:
-#             if ii == 0:
-#                 print ("ERROR mode is not found!")
-#                 return 0
-#             switch = False
-#         ii = ii + 1
-#     return n_max-step*ii
     
 # @njit
 def func_ML(neff, *args):
@@ -73,7 +65,7 @@ def func(neff, *args):
 
 
 # @njit(parallel=True)
-def calc_n_eff_ML(wavelength, n_core, n_sub, n_clad, d, d_clad, m):
+def calc_n_eff_ML(wavelength, n_core, n_sub, n_clad, d, d_clad, m, polar):
     neff = np.zeros_like(wavelength)
     for ii in range(len(wavelength)):
         if type(n_core) == np.ndarray:
@@ -83,7 +75,7 @@ def calc_n_eff_ML(wavelength, n_core, n_sub, n_clad, d, d_clad, m):
     return neff
 
 # @njit(parallel=True)
-def calc_n_eff(wavelength, n_core, n_sub, n_clad, d, m):
+def calc_n_eff(wavelength, n_core, n_sub, n_clad, d, m, polar):
     neff = np.zeros_like(wavelength)
     for ii in range(len(wavelength)):
         if type(n_core) == np.ndarray:
@@ -125,7 +117,7 @@ def find_zero_crossings(func, range_of_n_eff, args):
 
 
 
-def calc_n_eff_general(wavelength, n_core, n_sub, n_clad, d, m, d_clad=np.inf):
+def calc_n_eff_general(wavelength, n_core, n_sub, n_clad, d, m, polar, d_clad=np.inf):
     """
     Calculates the effective refractive index (neff) for each wavelength in a given range, considering 
     the refractive indices of the core, substrate, and cladding, as well as the geometrical dimensions 
@@ -139,7 +131,7 @@ def calc_n_eff_general(wavelength, n_core, n_sub, n_clad, d, m, d_clad=np.inf):
     - d: Thickness of the core layer.
     - d_clad: Thickness of the cladding layer.
     - m: Mode number for which to calculate the effective refractive index.
-    
+    - polar: TE or TM polarization
     Returns:
     - neff: An array of the calculated effective refractive indices for each wavelength.
     """
@@ -149,19 +141,18 @@ def calc_n_eff_general(wavelength, n_core, n_sub, n_clad, d, m, d_clad=np.inf):
         # Prepare args for func_ML and find_zero_crossings
         if isinstance(n_core, np.ndarray):
             if  isinstance(d_clad,np.ndarray):
-                args = (n_core[ii], n_sub[ii], n_clad[ii], d, d_clad, wavelength[ii], m)
+                args = (n_core[ii], n_sub[ii], n_clad[ii], d, d_clad, wavelength[ii], m, polar)
                 range_n = np.linspace(max(n_sub[ii],n_clad[ii][0])+0.01, n_core[ii]-0.01,1000)
             else:
-                args = (n_core[ii], n_sub[ii], n_clad[ii], d, wavelength[ii], m)
+                args = (n_core[ii], n_sub[ii], n_clad[ii], d, wavelength[ii], m, polar)
                 range_n = np.linspace(max(n_sub[ii],n_clad[ii])+0.01, n_core[ii]-0.01,1000)
-            
      
         else:
             if  isinstance(d_clad,np.ndarray):
-                args = (n_core, n_sub, n_clad, d, d_clad, wavelength[ii], m)
+                args = (n_core, n_sub, n_clad, d, d_clad, wavelength[ii], m, polar)
                 range_n = np.linspace(max(n_sub,n_clad[0])+0.01, n_core-0.01,10000)
             else:
-                args = (n_core, n_sub, n_clad, d, wavelength[ii], m)
+                args = (n_core, n_sub, n_clad, d, wavelength[ii], m, polar)
                 range_n = np.linspace(max(n_sub,n_clad)+0.01, n_core-0.01,10000)
             
         
